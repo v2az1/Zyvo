@@ -1,0 +1,6 @@
+{
+  "name": "Mailix",
+  "description": "Modern Temporary Email App by Zyvo",
+  "requestFramePermissions": ["notifications"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

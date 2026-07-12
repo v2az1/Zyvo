@@ -1,0 +1,104 @@
+# @license
+# SPDX-License-Identifier: Apache-2.0
+
+name: Mailix Android Build & Release CI/CD
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  # JOB 1: CODE VERIFICATION (LINT & TYPE CHECKING)
+  verify:
+    name: Verify Code Integrity & Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install Project Dependencies
+        run: npm ci
+
+      - name: Run TypeScript Compiler
+        run: npm run lint
+
+  # JOB 2: ANDROID APK & AAB GENERATION
+  build-android:
+    name: Build & Sign Android App (AAB / APK)
+    needs: verify
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Setup Java Development Kit (JDK 17)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Android SDK Tools
+        uses: android-actions/setup-android@v3
+
+      - name: Install Node Modules
+        run: npm ci
+
+      - name: Compile React Static Assets
+        run: npm run build
+
+      - name: Sync Web Files into Android Native Folder
+        run: |
+          npx cap sync android
+
+      - name: Build Android Release App Bundle (AAB) & Debug APK
+        run: |
+          cd android
+          ./gradlew bundleRelease assembleDebug --no-daemon
+
+      - name: Decode Keystore and Sign Release AAB
+        if: env.KEY_CONFIGURED == 'true'
+        env:
+          KEY_CONFIGURED: ${{ secrets.KEYSTORE_BASE64 != '' }}
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          # Write Base64 Keystore file safely
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/release.jks
+          
+          # Sign the generated release Android App Bundle (AAB)
+          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA256 \
+            -keystore android/app/release.jks \
+            -storepass "$KEYSTORE_PASSWORD" \
+            -keypass "$KEY_PASSWORD" \
+            android/app/build/outputs/bundle/release/app-release-unsigned.aab "$KEY_ALIAS"
+
+      - name: Archive Compiled Debug APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mailix-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Archive Compiled Production Signed AAB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mailix-production-aab
+          path: android/app/build/outputs/bundle/release/app-release-unsigned.aab # Or signed equivalent if keystore is provided
