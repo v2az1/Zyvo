@@ -1,0 +1,78 @@
+name: Mailix Single Test APK Build
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  build-apk:
+    name: Build Test Debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Check if Android Native Folder Exists
+        id: check-android
+        run: |
+          if [ -d "android" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "✅ Android native folder found. Proceeding with APK compilation."
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "❌ Android native folder not found. Please run 'npx cap add android' locally and commit the folder."
+          fi
+
+      - name: Setup Node.js Environment
+        if: steps.check-android.outputs.exists == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Setup Java Development Kit (JDK 17)
+        if: steps.check-android.outputs.exists == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Android SDK Tools
+        if: steps.check-android.outputs.exists == 'true'
+        uses: android-actions/setup-android@v3
+
+      - name: Install Node Modules
+        if: steps.check-android.outputs.exists == 'true'
+        run: npm ci || npm install
+
+      - name: Compile React Web Assets
+        if: steps.check-android.outputs.exists == 'true'
+        run: npm run build
+
+      - name: Sync Web Files to Capacitor Android Native Platform
+        if: steps.check-android.outputs.exists == 'true'
+        run: npx cap sync android
+
+      - name: Compile Android Debug APK
+        if: steps.check-android.outputs.exists == 'true'
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Upload Single Test APK Artifact
+        if: steps.check-android.outputs.exists == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mailix-test-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
