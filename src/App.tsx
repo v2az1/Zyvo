@@ -270,7 +270,7 @@ function MailixAppContent() {
               />
             )}
 
-            {activeTab === 'settings' && <SettingsView />}
+            {activeTab === 'settings' && <SettingsView onShowToast={showToast} />}
           </>
         )}
       </div>

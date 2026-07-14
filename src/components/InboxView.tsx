@@ -290,7 +290,7 @@ export const InboxView: React.FC<InboxViewProps> = ({
                       >
                         <div className="flex items-center space-x-1.5 rtl:space-x-reverse mb-2 text-[10px] font-bold text-blue-600 dark:text-blue-400">
                           <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-                          <span>AI EMAIL SUMMARY</span>
+                          <span>{t('detail.ai_summary').toUpperCase()}</span>
                         </div>
                         <ul className="space-y-1.5 text-[10px] text-slate-600 dark:text-slate-300 list-none pl-0">
                           {summaries[msg.id].map((point, index) => (
@@ -316,7 +316,7 @@ export const InboxView: React.FC<InboxViewProps> = ({
                           className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[9px] font-bold shrink-0 flex items-center space-x-1 cursor-pointer"
                         >
                           <RefreshCw className="w-2.5 h-2.5" />
-                          <span>Retry</span>
+                          <span>{t('common.retry')}</span>
                         </button>
                       </div>
                     )}
@@ -342,7 +342,13 @@ export const InboxView: React.FC<InboxViewProps> = ({
                         title="AI Summarize"
                       >
                         <Sparkles className={`w-3 h-3 ${loadingSummaries[msg.id] ? 'animate-spin text-blue-500' : 'text-blue-500 dark:text-blue-400'}`} />
-                        <span>{loadingSummaries[msg.id] ? 'Generating...' : summaries[msg.id] ? (expandedSummaries[msg.id] ? 'Hide Summary' : 'View Summary') : 'Summarize'}</span>
+                        <span>
+                          {loadingSummaries[msg.id] 
+                            ? t('detail.ai_generating') 
+                            : summaries[msg.id] 
+                              ? (expandedSummaries[msg.id] ? t('detail.ai_hide_summary') : t('detail.ai_view_summary')) 
+                              : t('detail.ai_summarize')}
+                        </span>
                       </button>
 
                       <div className="flex items-center space-x-1.5 rtl:space-x-reverse">

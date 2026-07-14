@@ -89,6 +89,14 @@ const translations: Record<AppLanguage, Record<string, string>> = {
     'detail.size': 'Size',
     'detail.delete_confirm': 'Are you sure you want to delete this email? This action is permanent.',
     'detail.deleted_success': 'Email deleted successfully',
+    'detail.ai_summary': 'AI Email Summary',
+    'detail.ai_summarize': 'Summarize with AI',
+    'detail.ai_summarizing': 'Gemini is summarizing this email...',
+    'detail.ai_regenerate': 'Regenerate',
+    'detail.ai_summary_desc': 'Generate a fast, high-quality, 3-5 bullet point AI summary of this email securely powered by Google Gemini.',
+    'detail.ai_view_summary': 'View Summary',
+    'detail.ai_hide_summary': 'Hide Summary',
+    'detail.ai_generating': 'Generating...',
 
     // Settings Screen
     'settings.title': 'Settings & Preferences',
@@ -206,6 +214,14 @@ const translations: Record<AppLanguage, Record<string, string>> = {
     'detail.size': 'سائز',
     'detail.delete_confirm': 'کیا آپ واقعی یہ ای میل حذف کرنا چاہتے ہیں؟ یہ عمل مستقل ہوگا۔',
     'detail.deleted_success': 'ای میل کامیابی کے ساتھ حذف کر دی گئی ہے',
+    'detail.ai_summary': 'اے آئی ای میل خلاصہ',
+    'detail.ai_summarize': 'اے آئی سے خلاصہ کریں',
+    'detail.ai_summarizing': 'جیمنی اس ای میل کا خلاصہ کر رہا ہے...',
+    'detail.ai_regenerate': 'دوبارہ تیار کریں',
+    'detail.ai_summary_desc': 'گوگل جیمنی کے ذریعے محفوظ طریقے سے اس ای میل کا ایک تیز، اعلیٰ معیار، 3-5 بلٹ پوائنٹس والا خلاصہ حاصل کریں۔',
+    'detail.ai_view_summary': 'خلاصہ دیکھیں',
+    'detail.ai_hide_summary': 'خلاصہ چھپائیں',
+    'detail.ai_generating': 'خلاصہ تیار ہو رہا ہے...',
 
     // Settings Screen
     'settings.title': 'ترتیبات اور ترجیحات',

@@ -14,7 +14,11 @@ import { AboutView } from './AboutView';
 import { PrivacyView } from './PrivacyView';
 import { TermsView } from './TermsView';
 
-export const SettingsView: React.FC = () => {
+interface SettingsViewProps {
+  onShowToast?: (message: string, type?: 'success' | 'info' | 'error') => void;
+}
+
+export const SettingsView: React.FC<SettingsViewProps> = ({ onShowToast }) => {
   const { 
     theme, setTheme, language, setLanguage, settings, updateSettings, t 
   } = useAppTheme();
@@ -27,23 +31,41 @@ export const SettingsView: React.FC = () => {
     if (window.confirm(t('detail.delete_confirm'))) {
       StorageService.clearAllCache();
       setCacheClearedMsg(true);
+      if (onShowToast) {
+        onShowToast(t('settings.cache_cleared') || 'Cache cleared!', 'success');
+      }
       setTimeout(() => setCacheClearedMsg(false), 4000);
     }
   };
 
   const handleRateApp = () => {
-    alert('Taking the user to the Google Play Store... Play Store Package ID: pk.zyvo.mailix');
+    const playStoreUrl = 'https://play.google.com/store/apps/details?id=pk.zyvo.mailix';
+    navigator.clipboard.writeText(playStoreUrl);
+    if (onShowToast) {
+      onShowToast('Google Play Link copied! Directing to Play Store...', 'info');
+    }
+    setTimeout(() => {
+      window.open(playStoreUrl, '_blank');
+    }, 1200);
   };
 
   const handleShareApp = () => {
+    const shareUrl = 'https://play.google.com/store/apps/details?id=pk.zyvo.mailix';
     if (navigator.share) {
       navigator.share({
         title: 'Mailix Temporary Email',
         text: 'Protect your inbox from spam! Generate clean temporary emails instantly with Mailix by Zyvo.',
-        url: window.location.href,
-      }).catch(console.error);
+        url: shareUrl,
+      }).catch((err) => {
+        if (err.name !== 'AbortError' && !err.message?.includes('canceled')) {
+          console.error('Error sharing app:', err);
+        }
+      });
     } else {
-      alert('Copying share link to clipboard: https://play.google.com/store/apps/details?id=pk.zyvo.mailix');
+      navigator.clipboard.writeText(shareUrl);
+      if (onShowToast) {
+        onShowToast('Share link copied to clipboard!', 'success');
+      }
     }
   };
 
